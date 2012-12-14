@@ -17,6 +17,8 @@
 *.jpeg
 *.png
 *.bmp
+*.opensdf
+*.suo
 
 # Folders #
 ###########

@@ -26,19 +26,19 @@ void CPlayerKeyboardInput::Handle(const ALLEGRO_EVENT& ev)
 	if (ev.keyboard.keycode == ALLEGRO_KEY_PAD_7)
 		m_board->Move(0,0, m_player);
 	else if (ev.keyboard.keycode == ALLEGRO_KEY_PAD_8)
-		m_board->Move(1, 0, m_player);
+		m_board->Move(0, 1, m_player);
 	else if (ev.keyboard.keycode == ALLEGRO_KEY_PAD_9)
-		m_board->Move(2, 0, m_player);
+		m_board->Move(0, 2, m_player);
 	else if (ev.keyboard.keycode == ALLEGRO_KEY_PAD_4)
-		m_board->Move(0,1, m_player);
+		m_board->Move(1, 0, m_player);
 	else if (ev.keyboard.keycode == ALLEGRO_KEY_PAD_5)
 		m_board->Move(1, 1, m_player);
 	else if (ev.keyboard.keycode == ALLEGRO_KEY_PAD_6)
-		m_board->Move(2, 1, m_player);
-	else if (ev.keyboard.keycode == ALLEGRO_KEY_PAD_1)
-		m_board->Move(0, 2, m_player);
-	else if (ev.keyboard.keycode == ALLEGRO_KEY_PAD_2)
 		m_board->Move(1, 2, m_player);
+	else if (ev.keyboard.keycode == ALLEGRO_KEY_PAD_1)
+		m_board->Move(2, 0, m_player);
+	else if (ev.keyboard.keycode == ALLEGRO_KEY_PAD_2)
+		m_board->Move(2, 1, m_player);
 	else if (ev.keyboard.keycode == ALLEGRO_KEY_PAD_3)
 		m_board->Move(2, 2, m_player);
 }

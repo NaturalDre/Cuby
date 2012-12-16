@@ -61,36 +61,36 @@ void CTTTBoard::Update(double dt)
 		NOTE("We have a draw!");
 		EndCurrentMatch();
 	}
-	//bool p1Win = CheckForWin(
 }
-bool CTTTBoard::CheckForWin(size_t col, size_t row)
+
+bool CTTTBoard::CheckForWin(size_t row, size_t col)
 {
 	bool result(false);
-	if (CheckForWinH(col, row) || CheckForWinV(col,row) || CheckForWinD1(col, row) || CheckForWinD2(col, row))
+	if (CheckForWinH(row, col) || CheckForWinV(row,col) || CheckForWinD1(row, col) || CheckForWinD2(row, col))
 		return true;
 	return false;
 }
 
-CPlayer* CTTTBoard::GetOwner(size_t x, size_t y)
+CPlayer* CTTTBoard::GetOwner(size_t row, size_t col)
 {
 	// Make sure the position is in bounds
-	if (x < m_board.size() && y < m_board[x].size())
-		return m_board[x][y];
+	if (row < m_board.size() && col < m_board[row].size())
+		return m_board[row][col];
 	return nullptr;
 }
 
-bool CTTTBoard::Move(size_t x, size_t y, CPlayer* player)
+bool CTTTBoard::Move(size_t row, size_t col, CPlayer* player)
 {
 	// Make sure it's the players turn and that the player isn't trying to
 	// overwrite the other player's turn and that it doesn't already own 
 	// the spot before we perform the move.
-	if (player != m_curPlayer || GetOwner(x,y) != nullptr || GetOwner(x,y) == player)
+	if (player != m_curPlayer || GetOwner(row,col) != nullptr || GetOwner(row,col) == player)
 		return false;
 	// Make sure the position is in bounds
-	if ((x >= 0 && x < 3) && (y >= 0 && y < 3))
+	if ((row >= 0 && row < 3) && (col >= 0 && col < 3))
 	{
-		m_board[x][y] = player;
-		if (CheckForWin(x, y))
+		m_board[row][col] = player;
+		if (CheckForWin(row, col))
 			m_winner = player;
 		// TODO: Make neater
 		if (player == m_player1)
@@ -103,26 +103,27 @@ bool CTTTBoard::Move(size_t x, size_t y, CPlayer* player)
 	// We failed to complete the move.
 	return false;
 }
+
 /// Left <-> Right
-bool CTTTBoard::CheckForWinH(size_t col, size_t row)
+bool CTTTBoard::CheckForWinH(size_t row, size_t col)
 {
-	const CPlayer* owner = GetOwner(col, row);
+	const CPlayer* owner = GetOwner(row, col);
 	// Seeing as we know 'owner' has the spot (col,row), we
 	// don't need to check it and can just initialize
 	// count to 1.
 	size_t count(1);
 	// Check from right to left for a win.
 	{
-		if (GetOwner(col - 1, row) == owner)
+		if (GetOwner(row, col - 1) == owner)
 			++count;
-		if (GetOwner(col - 2, row) == owner)
+		if (GetOwner(row, col - 2) == owner)
 			++count;
 	}
 	// Check from left to right for a win.
 	{
-		if (GetOwner(col + 1, row) == owner)
+		if (GetOwner(row, col + 1) == owner)
 			++count;
-		if (GetOwner(col + 2, row) == owner)
+		if (GetOwner(row, col + 2) == owner)
 			++count;
 	}
 	// If we found 3 spots, we have a winner.
@@ -133,25 +134,25 @@ bool CTTTBoard::CheckForWinH(size_t col, size_t row)
 }
 
 /// Top <-> Bottom
-bool CTTTBoard::CheckForWinV(size_t col, size_t row)
+bool CTTTBoard::CheckForWinV(size_t row, size_t col)
 {
-	const CPlayer* owner = GetOwner(col, row);
+	const CPlayer* owner = GetOwner(row, col);
 	// Seeing as we know 'owner' has the spot (col,row), we
 	// don't need to check it and can just initialize
 	// count to 1.
 	size_t count(1);
 	// Check bottom to top for a win.
 	{
-		if (GetOwner(col, row - 1) == owner)
+		if (GetOwner(row - 1, col) == owner)
 			++count;
-		if (GetOwner(col, row - 2) == owner)
+		if (GetOwner(row - 2, col) == owner)
 			++count;
 	}
 	// Check top to bottom for a win.
 	{
-		if (GetOwner(col, row + 1) == owner)
+		if (GetOwner(row + 1, col) == owner)
 			++count;
-		if (GetOwner(col, row + 2) == owner)
+		if (GetOwner(row + 2, col) == owner)
 			++count;
 	}
 	// If we found 3 spots, we have a winner.
@@ -161,25 +162,25 @@ bool CTTTBoard::CheckForWinV(size_t col, size_t row)
 }
 
 /// Top Right <-> Bottom Left
-bool CTTTBoard::CheckForWinD1(size_t col, size_t row)
+bool CTTTBoard::CheckForWinD1(size_t row, size_t col)
 {
-	const CPlayer* owner = GetOwner(col, row);
+	const CPlayer* owner = GetOwner(row, col);
 	// Seeing as we know 'owner' has the spot (x,y), we
 	// don't need to check it and can just initialize
 	// count to 1.
 	size_t count(1);
 	// Check Top Right -> Bottom Left for win.
 	{
-		if (GetOwner(col - 1, row + 1) == owner)
+		if (GetOwner(row + 1, col - 1) == owner)
 			++count;
-		if (GetOwner(col - 2, row + 2) == owner)
+		if (GetOwner(row + 2, col - 2) == owner)
 			++count;
 	}
 	// Check Bottom Left -> Top Right for win.
 	{
-		if (GetOwner(col + 1, row - 1) == owner)
+		if (GetOwner(row - 1, col + 1) == owner)
 			++count;
-		if (GetOwner(col + 2, row - 2) == owner)
+		if (GetOwner(row - 2, col + 2) == owner)
 			++count;
 	}
 	// If the count is 3, we have a winner.
@@ -190,7 +191,7 @@ bool CTTTBoard::CheckForWinD1(size_t col, size_t row)
 }
 
 // Top Left <-> Bottom Right 
-bool CTTTBoard::CheckForWinD2(size_t col, size_t row)
+bool CTTTBoard::CheckForWinD2(size_t row, size_t col)
 {
 	const CPlayer* owner = GetOwner(col, row);
 	// Seeing as we know 'owner' has the spot (x,y), we
@@ -199,16 +200,16 @@ bool CTTTBoard::CheckForWinD2(size_t col, size_t row)
 	size_t count(1);
 	// Check Bottom Right -> Top Left for a win,
 	{
-		if (GetOwner(col - 1, row - 1) == owner)
+		if (GetOwner(row - 1, col - 1) == owner)
 			++count;
-		if (GetOwner(col - 2, row - 2) == owner)
+		if (GetOwner(row - 2, col - 2) == owner)
 			++count;
 	}
 	// Check Top Left -> Bottom Right for a win.
 	{
-		if (GetOwner(col + 1, row + 1) == owner)
+		if (GetOwner(row + 1, col + 1) == owner)
 			++count;
-		if (GetOwner(col + 2, row + 2) == owner)
+		if (GetOwner(row + 2, col + 2) == owner)
 			++count;
 	}
 	// If the count is 3, we have a winner.
@@ -231,8 +232,8 @@ void CTTTBoard::OnMatchStarted(void)
 {
 	NOTE("Attempting to start a new match...");
 	// We don't want to start a new match if one is already being played,
-	// p1/p2 are nullpointers, or if p1/p2 are the same player.
-	if (IsMatchBeingPlayed() || !m_player1 || !m_player2 || m_player1 == m_player2)
+	// player1/player2 are nullpointers, or if player1/player2 are the same player.
+	if (/*IsMatchBeingPlayed() ||*/ !m_player1 || !m_player2 || m_player1 == m_player2)
 		return;
 	ClearBoard();
 	m_winner = nullptr;
@@ -245,8 +246,6 @@ void CTTTBoard::OnMatchStarted(void)
 
 void CTTTBoard::OnMatchEnded(void)
 {
-	//m_player1 = nullptr;
-	//m_player2 = nullptr;
 	m_curPlayer = nullptr;
 	m_matchBeingPlayed = false;
 	NOTE("Match ended.");

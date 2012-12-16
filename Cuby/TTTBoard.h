@@ -19,24 +19,24 @@ public:
 	CPlayer* GetPlayer1(void) const { return m_player1; }
 	CPlayer* GetPlayer2(void) const { return m_player2; }
 
-	CPlayer* GetOwner(size_t x, size_t y);
+	CPlayer* GetOwner(size_t row, size_t col);
 	bool IsMatchBeingPlayed(void) const { return m_matchBeingPlayed; }
 	size_t GetGamePieceSize(void) const { return m_gamePieceSize; }
 
-	bool Move(size_t x, size_t y, CPlayer* player);
+	bool Move(size_t row, size_t col, CPlayer* player);
 	void StartNewMatch(void) { OnMatchStarted(); }
 	void EndCurrentMatch(void) { OnMatchEnded(); }
 
 protected:
-	bool CheckForWin(size_t x, size_t y);
+	bool CheckForWin(size_t row, size_t col);
 	/// Check if a spot is a winning spot for the owner of the spot horizontally.
-	bool CheckForWinH(size_t col, size_t row);
+	bool CheckForWinH(size_t row, size_t col);
 	/// Check if a spot is a winning spot for the owner of the spot vertically.
-	bool CheckForWinV(size_t col, size_t row);
+	bool CheckForWinV(size_t row, size_t col);
 	/// Check if a spot is a winning move for player diagonally(Top Right <-> Bottom Left)
-	bool CheckForWinD1(size_t col, size_t row);
+	bool CheckForWinD1(size_t row, size_t col);
 	/// Check if a spot is a winning move for player diagonally(Top Left <-> Bottom Right)
-	bool CheckForWinD2(size_t col, size_t row);
+	bool CheckForWinD2(size_t row, size_t col);
 	bool CheckForDraw(void) const;
 
 
@@ -51,12 +51,11 @@ private:
 	CTTTBoardRender* m_boardRender;
 	CPlayer* m_player1;
 	CPlayer* m_player2;
-	bool m_paused;
+	bool m_paused; /// Set to true when a match is ended.
 	bool m_matchBeingPlayed;
-	CPlayer* m_winner;
+	CPlayer* m_winner; /// Set to non-null when someone wins the game.
 	CPlayer* m_curPlayer;
-	/// The width and height of each piece on the board.
-	size_t m_gamePieceSize;
+	size_t m_gamePieceSize; /// The width and height of each piece on the board.
 };
 
 #endif

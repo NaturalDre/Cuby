@@ -155,6 +155,8 @@ bool CEngine::AddGameObject(IGameObject* gameObject)
 		m_gameObjects.push_back(gameObject);
 		return true;
 	}
+
+	return false;
 }
 
 void CEngine::RemoveGameObject(IGameObject* gameObject)

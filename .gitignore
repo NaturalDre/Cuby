@@ -8,10 +8,9 @@
 *.so
 
 
-# Files #
+# Filetypes #
 #########
-*.vcxproj
-*.vcxproj.user
+*.vcxproj*
 *.sln
 *.jpg
 *.jpeg
@@ -19,6 +18,10 @@
 *.bmp
 *.opensdf
 *.suo
+
+# Files #
+#########
+*.vcxproj.filters
 
 # Folders #
 ###########

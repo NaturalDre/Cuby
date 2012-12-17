@@ -25,6 +25,12 @@
     <Filter Include="Source Files\TicTacToe">
       <UniqueIdentifier>{ce15612b-1be7-41f6-aaaa-8340a4524a27}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Checkers">
+      <UniqueIdentifier>{8165da98-3d00-4028-8211-08c67f356e2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Checkers">
+      <UniqueIdentifier>{49e6af4b-5a38-4cde-ab52-8db019449d9b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -80,6 +86,12 @@
     </ClCompile>
     <ClCompile Include="TTTBoardInput.cpp">
       <Filter>Source Files\TicTacToe</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckersBoard.cpp">
+      <Filter>Source Files\Checkers</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckersPiece.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +160,15 @@
     </ClInclude>
     <ClInclude Include="TTTBoardInput.h">
       <Filter>Header Files\TicTacToe</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckersBoard.h">
+      <Filter>Header Files\Checkers</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePiece.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckersPiece.h">
+      <Filter>Header Files\Checkers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

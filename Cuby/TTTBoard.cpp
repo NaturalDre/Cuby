@@ -228,13 +228,13 @@ bool CTTTBoard::CheckForDraw(void) const
 	return true;
 }
 
-void CTTTBoard::OnMatchStarted(void)
+bool CTTTBoard::OnMatchStarted(void)
 {
 	NOTE("Attempting to start a new match...");
 	// We don't want to start a new match if one is already being played,
 	// player1/player2 are nullpointers, or if player1/player2 are the same player.
 	if (/*IsMatchBeingPlayed() ||*/ !m_player1 || !m_player2 || m_player1 == m_player2)
-		return;
+		return false;
 	ClearBoard();
 	m_winner = nullptr;
 	m_paused = false;
@@ -242,13 +242,17 @@ void CTTTBoard::OnMatchStarted(void)
 	m_curPlayer = m_player1;
 
 	NOTE("Match started. Player1 (Keyboard with numpad), goes first. Player2(Mouse clicks), goes second.");
+	return true;
 }
 
-void CTTTBoard::OnMatchEnded(void)
+bool CTTTBoard::OnMatchEnded(void)
 {
+	// Note: May add an "Are you sure" dialogue.
+
 	m_curPlayer = nullptr;
 	m_matchBeingPlayed = false;
 	NOTE("Match ended.");
+	return true;
 }
 
 void CTTTBoard::ClearBoard(void)

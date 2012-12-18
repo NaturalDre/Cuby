@@ -24,8 +24,6 @@ public:
 	size_t GetGamePieceSize(void) const { return m_gamePieceSize; }
 
 	bool Move(size_t row, size_t col, CPlayer* player);
-	void StartNewMatch(void) { OnMatchStarted(); }
-	void EndCurrentMatch(void) { OnMatchEnded(); }
 
 protected:
 	bool CheckForWin(size_t row, size_t col);
@@ -42,8 +40,8 @@ protected:
 
 	void Start(void);
 	void Update(double dt);
-	void OnMatchStarted(void);
-	void OnMatchEnded(void);
+	bool OnMatchStarted(void);
+	bool OnMatchEnded(void);
 	void ClearBoard(void);
 private:
 	std::array<CBitmap*, 2> m_pieces;

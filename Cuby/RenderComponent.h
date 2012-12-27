@@ -7,7 +7,7 @@ class CRenderer;
 class IRenderComponent: public IComponent
 {
 public:
-	IRenderComponent(const std::string& name, CRenderer* m_render);
+	IRenderComponent(const std::string& name, CRenderer* m_renderer);
 	~IRenderComponent(void);
 	/// Proxy for OnRender();
 	void Render(void) { OnRender(); }

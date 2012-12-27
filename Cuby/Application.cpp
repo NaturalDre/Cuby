@@ -8,6 +8,8 @@
 #include "PlayerMouseInput.h"
 #include "Debug.h"
 #include "CheckersBoard.h"
+#include "CheckersBoardRender.h"
+#include "CheckersBoardInput.h"
 
 CApplication::CApplication(void)
 	: m_engine(nullptr)
@@ -33,6 +35,11 @@ int CApplication::Init(void)
 int CApplication::Run(void)
 {
 	CCheckersBoard* board = new CCheckersBoard(m_engine);
+	auto render = new CCheckersBoardRender(board, m_engine->GetRenderer());
+	auto input = new CCheckersBoardInput(board);
+	board->AddComponent(render);
+	board->AddComponent(input);
+	m_engine->AddInputComponent(input);
 	m_engine->SetGameBoard(board);
 	board->StartNewMatch();
 	//CTTTBoard* board = new CTTTBoard(m_engine);

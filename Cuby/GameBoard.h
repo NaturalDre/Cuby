@@ -12,8 +12,11 @@ class IGameBoard: public IGameObject
 {
 protected:
 	void SetRenderer(CRenderer* renderer) { m_renderer = renderer; }
+
+	inline void SetPieceWidth(size_t width) { if (width > 0) m_pieceWidth = width; }
+	inline void SetPieceHeight(size_t height) { if (height > 0) m_pieceHeight = height; }
 public:
-	IGameBoard(CEngine* engine): IGameObject("GameBoard", engine) { }
+	IGameBoard(CEngine* engine): IGameObject("GameBoard", engine), m_x(0), m_y(0), m_pieceWidth(32), m_pieceHeight(32) { }
 	virtual ~IGameBoard(void) { }
 
 	inline CRenderer* GetRenderer(void) const { return m_renderer; }
@@ -26,6 +29,10 @@ public:
 	/// @param y Y-position of the top left of the board when rendered.
 	inline void SetY(size_t y) { m_y = y; }
 
+
+	inline size_t GetPieceWidth(void) const { return m_pieceWidth; }
+	inline size_t GetPieceHeight(void) const { return m_pieceHeight; }
+
 	virtual bool OnMatchStarted(void) = 0;
 	virtual bool OnMatchEnded(void) = 0;
 
@@ -37,5 +44,7 @@ private:
 	CRenderer* m_renderer;
 	size_t m_x; /// Top left x-position of the board.
 	size_t m_y; /// Top right y-position of the board.
+	size_t m_pieceWidth;
+	size_t m_pieceHeight;
 };
 #endif

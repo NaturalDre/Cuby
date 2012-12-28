@@ -57,6 +57,22 @@ public:
 		return false; 
 	}
 	bool IsValidPosition(const RowCol& rc) const { return IsValidPosition(rc.row, rc.col); }
+	// Returns whether or not drc is 2 spaces diagnally from src.
+	bool IsJumpMove(const RowCol& src, const RowCol& drc) 
+	{ 
+		if (std::abs(src.row - drc.row) == 2 && std::abs(drc.col - drc.col) == 2)
+			return true;
+		return false;
+	}
+	// Returns whether or not drc is 1 space diagnal from src.
+	bool IsNormalMove(const RowCol& src, const RowCol& drc)
+	{
+		if (std::abs(src.row - drc.row) == 1 && std::abs(drc.col - drc.col) == 1)
+			return true;
+		return false;
+	}
+	bool CanMove(const RowCol& src, const RowCol& drc);
+	bool CanJump(const RowCol& src, const RowCol& drc);
 	const std::array<std::array<size_t, 8>, 8>& GetBoard(void) const { return m_board; }
 
 protected:
@@ -73,14 +89,19 @@ protected:
 	/// Removes every gamepiece on the board.
 	void ClearBoard(void);
 	/// Add each gamepiece for both players to the board.
-	/// @note This should only be called by St
+	/// \note This should only be called by OnMatchStarted()
 	void PlacePieces(void);
 
-	/// Can this move be made?
-	/// @param src The position of the selected piece.
-	/// @param drc The position you want to move to.
-	/// \return Whether or not the move is valid.
-	bool IsValidMove(const RowCol& src, const RowCol& drc);
+	/// Helper function to handle a regular move.
+	/// \note Called only by Move().
+	void HandleMove(const RowCol& drc);
+	/// Helper function to handle a jump move.
+	/// \note Called only by Move().
+	void HandleJump(const RowCol& drc);
+	/// Helper function to handle a successful move.
+	/// \note Called only by Move().
+	void HandleSuccessfulMove(const RowCol& drc);
+
 private:
 	std::array<std::array<size_t, 8>, 8> m_board;
 	size_t m_curPlayer;

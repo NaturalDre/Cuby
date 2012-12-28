@@ -92,38 +92,83 @@ bool CCheckersBoard::Move(size_t row, size_t col)
 	if (!GetSelected().valid)
 		return false;
 
-	if (IsValidMove(GetSelected(), RowCol(row,col, true)))
+	const RowCol drc(row, col);
+
+	// Have we completed a move successfully?
+	bool moveSuccessful(false);
+	// Is the move being attemped a valid move? (Are they trying to move 1 unit diagnally?
+	if (CanMove(GetSelected(), RowCol(row,col)))
 	{
-		if (GetPlayerAt(RowCol(row,col)) == ALPHA)
-			++m_removedAlphaPieces;
-		else if(GetPlayerAt(RowCol(row,col)) == BETA)
-			++m_removedBetaPieces;
-		m_board[row][col] = GetPieceAt(GetSelected());
-		m_board[GetSelected().row][GetSelected().col] = BLANK;
-		m_selected.valid = false;
-
-		if (m_curPlayer == ALPHA && row == 7)
-		{
-			m_board[row][col] = KING_ALPHA;
-			NOTE("Alpha piece has been crowned.");
-		}
-		else if (m_curPlayer == BETA && row == 0)
-		{
-			m_board[row][col] = KING_BETA; 
-			NOTE("Beta piece has been crowned.");
-		}
-
-		NOTE("Piece successfully moved.");
-		if (m_removedAlphaPieces == 12 || m_removedBetaPieces == 12)
-		{
-			NOTE("We have a winner(Checkers)");
-		}
-		if (m_curPlayer == ALPHA)
-			m_curPlayer = BETA;
-		else
-			m_curPlayer = ALPHA;
+		HandleMove(drc);
+		moveSuccessful = true;
 	}
+	// Is the move being attemped a valid jump? (Are they trying to move 2 units diagnally over an enemy unit?
+	else if (CanJump(GetSelected(), RowCol(row,col)))
+	{
+		HandleJump(drc);
+		moveSuccessful = true;
+	}
+	// If a move is successful we need to check/set a few things.
+	if (moveSuccessful)
+		HandleSuccessfulMove(drc);
 	return false;
+}
+
+void CCheckersBoard::HandleMove(const RowCol& drc)
+{
+	m_board[drc.row][drc.col] = GetPieceAt(GetSelected());
+	m_board[GetSelected().row][GetSelected().col] = BLANK;
+}
+
+void CCheckersBoard::HandleJump(const RowCol& drc)
+{
+	int rowModifier(-1);
+	int colModifier(-1);
+	if (GetSelected().row - drc.row < 0)
+		rowModifier = 1;
+	if (GetSelected().col - drc.col < 0)
+		colModifier = 1;
+	m_board[drc.row][drc.col] = GetPieceAt(GetSelected());
+	m_board[GetSelected().row][GetSelected().col] = BLANK;
+	m_board[GetSelected().row + rowModifier][GetSelected().col + colModifier] = BLANK;
+
+	if (GetPlayerAt(RowCol(drc.row,drc.col)) == ALPHA)
+		++m_removedAlphaPieces;
+	else if(GetPlayerAt(RowCol(drc.row,drc.col)) == BETA)
+		++m_removedBetaPieces;
+}
+
+void CCheckersBoard::HandleSuccessfulMove(const RowCol& drc)
+{
+	// If Alpha got a piece to the end, crown it.
+	if (m_curPlayer == ALPHA && drc.row == 7 && GetPieceAt(drc.row, drc.col) != KING_ALPHA)
+	{
+		m_board[drc.row][drc.col] = KING_ALPHA;
+		NOTE("Alpha piece has been crowned.");
+	}
+	// If Beta got a piece ot the end, crown it.
+	else if (m_curPlayer == BETA && drc.row == 0 && GetPieceAt(drc.row, drc.col) != KING_BETA)
+	{
+		m_board[drc.row][drc.col] = KING_BETA; 
+		NOTE("Beta piece has been crowned.");
+	}
+
+	// This player is about to be switched so the selected piece needs to be invalidated.
+	// TODO: Make sure to check if it's still possible to jump over another piece before 
+	//		 ending the current player's turn(Unless the piece they moved was crowned, then
+	//		 it doesn't matter if it can capture another piece.)
+	m_selected.valid = false;
+	// Switch players.
+	if (m_curPlayer == ALPHA)
+		m_curPlayer = BETA;
+	else
+		m_curPlayer = ALPHA;
+
+	NOTE("Piece successfully moved.");
+	if (m_removedAlphaPieces == 12 || m_removedBetaPieces == 12)
+	{
+		NOTE("We have a winner(Checkers)");
+	}
 }
 
 bool CCheckersBoard::Select(size_t row, size_t col)
@@ -156,16 +201,17 @@ bool CCheckersBoard::IsKing(const RowCol& rc)
 	return false;
 }
 
-// This function is not finished. Pieces need to jump OVER an enemy piece,
-// not ONTO its spot.
-bool CCheckersBoard::IsValidMove(const RowCol& src, const RowCol& drc)
+bool CCheckersBoard::CanMove(const RowCol& src, const RowCol& drc)
 {
 	// Return false if src and drc are not valid positions, 
 	// src is blank
 	// or src and drc are owned by the same player.
-	if (!IsValidPosition(src) || !IsValidPosition(drc) || GetPlayerAt(src) == BLANK /*|| GetPlayerOwner(drc) == BLANK*/ || GetPlayerAt(src) == GetPlayerAt(drc))
+	if (!IsValidPosition(src) || !IsValidPosition(drc) || GetPlayerAt(src) == BLANK || GetPlayerAt(src) == GetPlayerAt(drc))
 		return false;
-
+	// To do a move, the destination location must be one diagnal unit away and 
+	// the destination location must be blank.
+	if (GetPlayerAt(drc) != BLANK || std::abs(src.row - drc.row) != 1 || std::abs(src.col - drc.col) != 1)
+		return false;
 	// Kings can move forward and backwards.
 	if (IsKing(src))
 	{
@@ -186,6 +232,46 @@ bool CCheckersBoard::IsValidMove(const RowCol& src, const RowCol& drc)
 		else if (GetPlayerAt(src) == BETA)	// This is kind of pointless right now since
 		{										// BETA can be the only other answer. But I want to be safe for the future.
 			if (src.row - drc.row == 1 && std::abs(src.col - drc.col) == 1)
+				return true;
+		}
+	}
+
+	return false;
+}
+
+bool CCheckersBoard::CanJump(const RowCol& src, const RowCol& drc)
+{
+	// Return false if src and drc are not valid positions, 
+	// src is blank
+	// or src and drc are owned by the same player.
+	if (!IsValidPosition(src) || !IsValidPosition(drc) || GetPlayerAt(src) == BLANK || GetPlayerAt(src) == GetPlayerAt(drc))
+		return false;
+
+	// To do a jump, the destination location must be two diagnal units away and 
+	// the destination location must be blank.
+	if (GetPlayerAt(drc) != BLANK || std::abs(src.row - drc.row) != 2 || std::abs(src.col - drc.col) != 2)
+		return false;
+
+	// Kings can move forward and backwards.
+	if (IsKing(src))
+	{
+		// A king MUST be moved by one column and one row.
+		if (std::abs((src.row - drc.row)) == 2 && std::abs(src.col - drc.col) == 2)
+			return true;
+	}
+	else
+	{
+		// Regular Alpha pieces can only move down.
+		if (GetPlayerAt(src) == ALPHA)
+		{
+		// Player alpha can only move a regular piece DOWN one row and one column(direction doesn't matter)
+			if (src.row - drc.row == -2 && std::abs(src.col - drc.col) == 2)
+				return true;
+		}
+		// Regular Beta pieces can only move up.
+		else if (GetPlayerAt(src) == BETA)	// This is kind of pointless right now since
+		{										// BETA can be the only other answer. But I want to be safe for the future.
+			if (src.row - drc.row == 2 && std::abs(src.col - drc.col) == 2)
 				return true;
 		}
 	}

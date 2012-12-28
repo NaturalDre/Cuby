@@ -53,7 +53,7 @@ void CCheckersBoardRender::OnRender(void)
 			if (drawBlack)
 				al_draw_filled_rectangle(x1,y1,x2,y2, al_map_rgb(0,0,0));
 			else
-				al_draw_filled_rectangle(x1,y1,x2,y2, al_map_rgb(255,0,0));
+				al_draw_filled_rectangle(x1,y1,x2,y2, al_map_rgb(155,0,0));
 
 
 			// Draw the pieces

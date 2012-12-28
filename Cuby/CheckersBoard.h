@@ -31,19 +31,34 @@ public:
 	bool Move(size_t row, size_t col);
 	bool Select(size_t row, size_t col);
 	inline size_t GetCurPlayer(void) const { return m_curPlayer; }
-	size_t GetOwner(size_t row, size_t col) const;
+	inline size_t GetPieceAt(size_t row, size_t col) const 
+	{ 
+		if (!IsValidPosition(row, col)) 
+			return BLANK; 
+		else 
+			return m_board[row][col]; 
+	}
 	/// Returns what piece occupies a position.
 	/// @param rc The position you want to check.
 	/// \return The piece that occupies the position. (BLANK, ALPHA, BETA, KING_ALPHA, KING_BETA)
-	inline size_t GetOwner(const RowCol& rc) const { return GetOwner(rc.row, rc.col); }
+	inline size_t GetPieceAt(const RowCol& rc) const { return GetPieceAt(rc.row, rc.col); }
 	/// Returns what *PLAYER* owns the piece that occupies this spot.
 	/// @param rc The position you want to check.
 	/// \return Either ALPHA, BETA, or BLANK. Remember, ALPHA is Player1, BETA is Player2.
-	size_t GetPlayerOwner(const RowCol& rc);
+	size_t GetPlayerAt(const RowCol& rc);
 	inline RowCol GetSelected(void) const { return m_selected; }
+	/// Checks if the piece at a location is a king.
 	bool IsKing(const RowCol& rc);
-	bool IsValid(const RowCol& rc);
+	/// Returns whether or not the position exists on the gameboard.
+	bool IsValidPosition(size_t row, size_t col) const 
+	{ 
+		if (row < GetBoard().size() && col < GetBoard().size()) 
+			return true; 
+		return false; 
+	}
+	bool IsValidPosition(const RowCol& rc) const { return IsValidPosition(rc.row, rc.col); }
 	const std::array<std::array<size_t, 8>, 8>& GetBoard(void) const { return m_board; }
+
 protected:
 	void Start(void);
 	void Update(double dt);
@@ -70,6 +85,8 @@ private:
 	std::array<std::array<size_t, 8>, 8> m_board;
 	size_t m_curPlayer;
 	RowCol m_selected;
+	size_t m_removedAlphaPieces;
+	size_t m_removedBetaPieces;
 };
 
 #endif

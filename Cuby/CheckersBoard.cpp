@@ -11,6 +11,8 @@ CCheckersBoard::CCheckersBoard(CEngine* engine)
 	, m_board()
 	, m_curPlayer(0)
 	, m_selected(0,0, false)
+	, m_removedAlphaPieces(0)
+	, m_removedBetaPieces(0)
 {
 	SetPieceWidth(64);
 	SetPieceHeight(64);
@@ -92,9 +94,30 @@ bool CCheckersBoard::Move(size_t row, size_t col)
 
 	if (IsValidMove(GetSelected(), RowCol(row,col, true)))
 	{
-		m_board[row][col] = GetOwner(GetSelected());
+		if (GetPlayerAt(RowCol(row,col)) == ALPHA)
+			++m_removedAlphaPieces;
+		else if(GetPlayerAt(RowCol(row,col)) == BETA)
+			++m_removedBetaPieces;
+		m_board[row][col] = GetPieceAt(GetSelected());
 		m_board[GetSelected().row][GetSelected().col] = BLANK;
 		m_selected.valid = false;
+
+		if (m_curPlayer == ALPHA && row == 7)
+		{
+			m_board[row][col] = KING_ALPHA;
+			NOTE("Alpha piece has been crowned.");
+		}
+		else if (m_curPlayer == BETA && row == 0)
+		{
+			m_board[row][col] = KING_BETA; 
+			NOTE("Beta piece has been crowned.");
+		}
+
+		NOTE("Piece successfully moved.");
+		if (m_removedAlphaPieces == 12 || m_removedBetaPieces == 12)
+		{
+			NOTE("We have a winner(Checkers)");
+		}
 		if (m_curPlayer == ALPHA)
 			m_curPlayer = BETA;
 		else
@@ -105,7 +128,7 @@ bool CCheckersBoard::Move(size_t row, size_t col)
 
 bool CCheckersBoard::Select(size_t row, size_t col)
 {
-	const size_t OWNER = GetOwner(row, col);
+	const size_t OWNER = GetPlayerAt(RowCol(row, col));
 	// It has to be the player's turn and the spot must
 	// not be blank in order to select it.
 	if (m_curPlayer != OWNER || OWNER == BLANK)
@@ -116,70 +139,55 @@ bool CCheckersBoard::Select(size_t row, size_t col)
 	return true;
 }
 
-size_t CCheckersBoard::GetOwner(size_t row, size_t col) const
+size_t CCheckersBoard::GetPlayerAt(const RowCol& rc)
 {
-	// Make sure the location is in bounds.
-	if (row >= m_board.size() || col >= m_board[row].size())
-		return BLANK;
-	else
-		return m_board[row][col];
-}
-
-size_t CCheckersBoard::GetPlayerOwner(const RowCol& rc)
-{
-	if (GetOwner(rc) == ALPHA || GetOwner(rc) == KING_ALPHA) 
+	if (GetPieceAt(rc) == ALPHA || GetPieceAt(rc) == KING_ALPHA) 
 		return ALPHA;
-	else if (GetOwner(rc) == BETA || GetOwner(rc) == KING_BETA)
+	else if (GetPieceAt(rc) == BETA || GetPieceAt(rc) == KING_BETA)
 		return BETA;
 	return BLANK;
 }
 
 bool CCheckersBoard::IsKing(const RowCol& rc)
 {
-	const size_t TYPE = GetOwner(rc);
+	const size_t TYPE = GetPieceAt(rc);
 	if (TYPE == KING_ALPHA || TYPE == KING_BETA)
 		return true;
 	return false;
 }
 
-bool CCheckersBoard::IsValid(const RowCol& rc)
-{
-	// warning: signed/unsigned mismatch
-	if (rc.row < GetBoard().size() || rc.col < GetBoard()[rc.col].size())
-		return true;
-	return false;
-}
-
+// This function is not finished. Pieces need to jump OVER an enemy piece,
+// not ONTO its spot.
 bool CCheckersBoard::IsValidMove(const RowCol& src, const RowCol& drc)
 {
 	// Return false if src and drc are not valid positions, 
 	// src is blank
 	// or src and drc are owned by the same player.
-	if (!IsValid(src) || !IsValid(drc) || GetPlayerOwner(src) == BLANK /*|| GetPlayerOwner(drc) == BLANK*/ || GetPlayerOwner(src) == GetPlayerOwner(drc))
+	if (!IsValidPosition(src) || !IsValidPosition(drc) || GetPlayerAt(src) == BLANK /*|| GetPlayerOwner(drc) == BLANK*/ || GetPlayerAt(src) == GetPlayerAt(drc))
 		return false;
 
-	const bool srcIsKing = IsKing(src);
-
-	if (srcIsKing)
+	// Kings can move forward and backwards.
+	if (IsKing(src))
 	{
-		if (std::abs((src.row - drc.row)) == 1 && std::abs(src.row - drc.col) == 1)
+		// A king MUST be moved by one column and one row.
+		if (std::abs((src.row - drc.row)) == 1 && std::abs(src.col - drc.col) == 1)
 			return true;
 	}
 	else
 	{
-		int owner = GetPlayerOwner(src);
-		int a = ALPHA;
-		if (GetPlayerOwner(src) == ALPHA)
+		// Regular Alpha pieces can only move down.
+		if (GetPlayerAt(src) == ALPHA)
 		{
+		// Player alpha can only move a regular piece DOWN one row and one column(direction doesn't matter)
 			if (src.row - drc.row == -1 && std::abs(src.col - drc.col) == 1)
 				return true;
 		}
-		else
-		{
+		// Regular Beta pieces can only move up.
+		else if (GetPlayerAt(src) == BETA)	// This is kind of pointless right now since
+		{										// BETA can be the only other answer. But I want to be safe for the future.
 			if (src.row - drc.row == 1 && std::abs(src.col - drc.col) == 1)
 				return true;
 		}
 	}
-
 	return false;
 }

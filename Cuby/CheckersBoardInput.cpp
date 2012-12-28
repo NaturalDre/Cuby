@@ -21,10 +21,10 @@ void CCheckersBoardInput::Handle(const ALLEGRO_EVENT& ev)
 		const size_t col = ev.mouse.x / m_board->GetPieceWidth();
 		const size_t row = ev.mouse.y / m_board->GetPieceHeight();
 
-		const size_t OWNER = m_board->GetOwner(row, col);
+		const size_t OWNER = m_board->GetPlayerAt(RowCol(row, col));
 		// Do a move only if a the selected piece is valid, belongs to the current player, and
 		// that it does not  belong to the current player.
-		if (m_board->GetSelected().valid && m_board->GetCurPlayer() == m_board->GetOwner(m_board->GetSelected())/* && OWNER != CCheckersBoard::BLANK*/ && OWNER != m_board->GetCurPlayer())
+		if (m_board->GetSelected().valid && m_board->GetCurPlayer() == m_board->GetPlayerAt(m_board->GetSelected())/* && OWNER != CCheckersBoard::BLANK*/ && OWNER != m_board->GetCurPlayer())
 			m_board->Move(row, col);
 		// In all other scenarios, select the position (row,col). Note that
 		// Select() will take care of selecting an invalid piece.

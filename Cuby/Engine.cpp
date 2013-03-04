@@ -7,6 +7,9 @@
 #include <allegro5\allegro5.h>
 #include <allegro5\allegro_image.h>
 #include <allegro5\allegro_primitives.h>
+#include <allegro5\allegro_font.h>
+#include <allegro5\allegro_ttf.h>
+#include "UI.h"
 
 CEngine::CEngine(void)
 	: m_done(false)
@@ -17,6 +20,7 @@ CEngine::CEngine(void)
 	, m_renderer(nullptr)
 	, m_timeLastUpdated(0)
 	, m_gameBoard(nullptr)
+	, m_ui(nullptr)
 {
 
 }
@@ -48,6 +52,8 @@ int CEngine::Init(void)
 	// To receive mouse events.
 	if (!al_install_mouse())
 		return -5;
+	al_init_font_addon();
+	al_init_ttf_addon();
 
 	m_display = al_create_display(1000, 600);
 	if (!m_display)
@@ -70,7 +76,7 @@ int CEngine::Init(void)
 
 	// Renderer that controls what is shown on the screen.
 	m_renderer = new CRenderer(this);
-
+	m_ui = new CUI;
 	return 0;
 }
 
@@ -119,16 +125,23 @@ void CEngine::OnRender(void)
 {
 	if (m_renderer)
 		m_renderer->Render();
+	GetUI()->GetCanvas()->RenderCanvas();
 	al_flip_display();
 	al_clear_to_color(al_map_rgb(150,150,150));
 	m_needRedraw = false;
 }
 
-void CEngine::PushEvent(const ALLEGRO_EVENT& ev)
+void CEngine::PushEvent(ALLEGRO_EVENT& ev)
 {
 	for (auto iter = m_inputComponents.begin(); iter != m_inputComponents.end(); ++iter)
+	{
 		if ((*iter)->IsEnabled())
 			(*iter)->Handle(ev);
+
+		if (iter == m_inputComponents.end())
+			break;
+	}
+	GetUI()->GetInput().ProcessMessage(ev);
 }
 
 bool CEngine::AddInputComponent(IInputComponent* input)

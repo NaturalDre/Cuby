@@ -4,7 +4,7 @@
 
 IGameObject::IGameObject(const std::string& name, CEngine* engine/*, float x, float y, float angle*/)
 	: m_engine(engine)
-	//, m_name(name)
+	, m_name(name)
 	//, m_transform(b2Vec2(x, y), b2Rot(angle))
 {
 	assert(GetEngine() != nullptr);

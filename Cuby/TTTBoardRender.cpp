@@ -36,8 +36,8 @@ void CTTTBoardRender::OnRender(void)
 	{
 		for (size_t col = 0; col < 3; ++col)
 		{
-			const size_t x1 = col * gamePieceSize;
-			const size_t y1 = row * gamePieceSize;
+			const size_t x1 = col * gamePieceSize + m_board->GetX();
+			const size_t y1 = row * gamePieceSize + m_board->GetY();
 			const size_t x2 = x1 + gamePieceSize;
 			const size_t y2 = y1 + gamePieceSize;
 			

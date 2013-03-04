@@ -24,6 +24,7 @@ public:
 	size_t GetGamePieceSize(void) const { return m_gamePieceSize; }
 
 	bool Move(size_t row, size_t col, CPlayer* player);
+	void Start(void);
 
 protected:
 	bool CheckForWin(size_t row, size_t col);
@@ -38,7 +39,7 @@ protected:
 	bool CheckForDraw(void) const;
 
 
-	void Start(void);
+
 	void Update(double dt);
 	bool OnMatchStarted(void);
 	bool OnMatchEnded(void);

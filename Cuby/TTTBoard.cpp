@@ -8,7 +8,7 @@
 #include "Engine.h"
 
 CTTTBoard::CTTTBoard(CEngine* engine, size_t gamePieceSize)
-	: IGameBoard(engine)
+	: IGameBoard(engine, "TTT")
 	, m_boardRender(nullptr)
 	, m_board()
 	, m_player1(nullptr)
@@ -35,6 +35,7 @@ void CTTTBoard::Start(void)
 		auto keyboardInput = new CPlayerKeyboardInput(m_player1, this);
 		m_player1->AddComponent(keyboardInput);
 		m_player1->SetGamePiece("player1piece.png");
+		m_player1->Start();
 		GetEngine()->AddInputComponent(keyboardInput);
 	}
 	{
@@ -42,6 +43,7 @@ void CTTTBoard::Start(void)
 		auto mouseInput = new CPlayerMouseInput(m_player2, this);
 		m_player2->AddComponent(mouseInput);
 		m_player2->SetGamePiece("player2piece.png");
+		m_player2->Start();
 		GetEngine()->AddInputComponent(mouseInput);
 	}
 }

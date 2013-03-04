@@ -45,8 +45,8 @@ void CCheckersBoardRender::OnRender(void)
 		for (size_t col = 0; col < m_board->GetBoard().size(); ++col)
 		{
 			drawBlack = !drawBlack;
-			const size_t x1 = col * m_board->GetPieceWidth();
-			const size_t y1 = row * m_board->GetPieceHeight();
+			const size_t x1 = col * m_board->GetPieceWidth() + m_board->GetX();
+			const size_t y1 = row * m_board->GetPieceHeight() + m_board->GetY();
 			const size_t x2 = x1 + m_board->GetPieceWidth();
 			const size_t y2 = y1 + m_board->GetPieceHeight();
 
@@ -74,8 +74,8 @@ void CCheckersBoardRender::OnRender(void)
 	if (m_board->GetSelected().valid)
 	{
 		const RowCol rc = m_board->GetSelected();
-			const size_t x1 = rc.col * m_board->GetPieceWidth();
-			const size_t y1 = rc.row * m_board->GetPieceHeight();
+		const size_t x1 = rc.col * m_board->GetPieceWidth() + m_board->GetX();
+		const size_t y1 = rc.row * m_board->GetPieceHeight() + m_board->GetY();
 			const size_t x2 = x1 + m_board->GetPieceWidth();
 			const size_t y2 = y1 + m_board->GetPieceHeight();
 

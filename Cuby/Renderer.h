@@ -17,5 +17,7 @@ public:
 private:
 	CEngine* m_engine;
 	std::list<IRenderComponent*> m_renderList;
+
+
 };
 #endif

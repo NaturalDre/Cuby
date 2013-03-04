@@ -16,7 +16,7 @@ protected:
 	inline void SetPieceWidth(size_t width) { if (width > 0) m_pieceWidth = width; }
 	inline void SetPieceHeight(size_t height) { if (height > 0) m_pieceHeight = height; }
 public:
-	IGameBoard(CEngine* engine): IGameObject("GameBoard", engine), m_x(0), m_y(0), m_pieceWidth(32), m_pieceHeight(32) { }
+	IGameBoard(CEngine* engine, const std::string& name = "GameBoard"): IGameObject(name, engine), m_x(0), m_y(0), m_pieceWidth(32), m_pieceHeight(32) { }
 	virtual ~IGameBoard(void) { }
 
 	inline CRenderer* GetRenderer(void) const { return m_renderer; }
@@ -46,5 +46,6 @@ private:
 	size_t m_y; /// Top right y-position of the board.
 	size_t m_pieceWidth;
 	size_t m_pieceHeight;
+	//const std::string m_name;
 };
 #endif

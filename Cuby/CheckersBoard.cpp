@@ -7,12 +7,14 @@ const size_t ROWS_PER_PLAYER = 3;
 
 
 CCheckersBoard::CCheckersBoard(CEngine* engine)
-	: IGameBoard(engine)
+	: IGameBoard(engine, "Checkers")
 	, m_board()
 	, m_curPlayer(0)
 	, m_selected(0,0, false)
 	, m_removedAlphaPieces(0)
 	, m_removedBetaPieces(0)
+	, m_xMargin(0)
+	, m_yMargin(100)
 {
 	SetPieceWidth(64);
 	SetPieceHeight(64);
@@ -31,6 +33,9 @@ void CCheckersBoard::Start(void)
 void CCheckersBoard::Update(double dt)
 {
 	IGameObject::Update(dt);
+
+	if (GetCurPlayer() != BLANK && (!CanAlphaMove() || !CanBetaMove()))
+		NOTE("A side is unable to make a move.");
 }
 
 bool CCheckersBoard::OnMatchStarted(void)
@@ -38,15 +43,20 @@ bool CCheckersBoard::OnMatchStarted(void)
 	NOTE("Attemping to start match...");
 	ClearBoard();
 	PlacePieces();
-
 	// Alpha always goes first.
 	m_curPlayer = ALPHA;
-	return false;
+	return true;
 }
 
 bool CCheckersBoard::OnMatchEnded(void)
 {
-	return false;
+	NOTE("Attempting to end a Tic Tac Toe match...");
+	m_removedAlphaPieces = 0;
+	m_removedBetaPieces = 0;
+	m_selected.valid = false;
+	m_curPlayer = BLANK;
+	ClearBoard();
+	return true;
 }
 
 void CCheckersBoard::ClearBoard(void)
@@ -252,12 +262,49 @@ bool CCheckersBoard::CanJump(const RowCol& src, const RowCol& drc)
 	if (GetPlayerAt(drc) != BLANK || std::abs(src.row - drc.row) != 2 || std::abs(src.col - drc.col) != 2)
 		return false;
 
+	// The difference between the source position and destination position.
+	const RowCol diff(src.row - drc.row, src.col - drc.col);
+	// Constants for positions one diagnal unit away from src
+	const RowCol BR(src.row + 1, src.col + 1); // Bottom-right
+	const RowCol BL(src.row + 1, src.col - 1); // Bottom-left
+	const RowCol TR(src.row - 1, src.col + 1); // Top-right
+	const RowCol TL(src.row - 1, src.col - 1); // Top-left
+
 	// Kings can move forward and backwards.
+	// A king MUST be moved by one column and one row.
 	if (IsKing(src))
 	{
-		// A king MUST be moved by one column and one row.
-		if (std::abs((src.row - drc.row)) == 2 && std::abs(src.col - drc.col) == 2)
-			return true;
+		RowCol pos(0,0, false);
+		if (diff.row < 0 && diff.col > 0) 
+			pos = BL;	// They are jumping at the bottom-left square.
+		else if(diff.row < 0 && diff.col < 0)
+			pos = BR;	// They are jumping at the bottom-right square.
+		else if(diff.row > 0 && diff.col > 0)
+			pos = TL;	// They are jumping at the top-left square.
+		else if (diff.row > 0 && diff.col < 0)
+			pos = TR;	// They are jumping at the top-right square.
+
+		if (GetPlayerAt(src) == ALPHA)
+		{
+
+			if (std::abs(diff.row) == 2 && std::abs(diff.col) == 2)
+			{
+				// Make sure we're jumping OVER an enemy piece.
+				if (pos.valid && GetPlayerAt(pos) == BETA)
+					return true;
+				return false;
+			}
+		}
+		else if (GetPlayerAt(src) == BETA)
+		{
+			if (std::abs(diff.row) == 2 && std::abs(diff.col) == 2)
+			{
+				// Make sure we're jumping OVER an enemy piece.
+				if (pos.valid && GetPlayerAt(pos) == ALPHA)
+					return true;
+				return false;
+			}
+		}
 	}
 	else
 	{
@@ -265,15 +312,61 @@ bool CCheckersBoard::CanJump(const RowCol& src, const RowCol& drc)
 		if (GetPlayerAt(src) == ALPHA)
 		{
 		// Player alpha can only move a regular piece DOWN one row and one column(direction doesn't matter)
-			if (src.row - drc.row == -2 && std::abs(src.col - drc.col) == 2)
-				return true;
+			if (diff.row == -2 && std::abs(diff.col))
+			{
+				// Make sure we're jumping OVER an enemy piece.
+				const RowCol p1rc(src.row + 1, src.col + 1);
+				const RowCol p2rc(src.row + 1, src.col -1);
+				if (GetPlayerAt(p1rc) == BETA || GetPlayerAt(p2rc) == BETA)
+					return true;
+			}
 		}
 		// Regular Beta pieces can only move up.
 		else if (GetPlayerAt(src) == BETA)	// This is kind of pointless right now since
 		{										// BETA can be the only other answer. But I want to be safe for the future.
-			if (src.row - drc.row == 2 && std::abs(src.col - drc.col) == 2)
+			if (diff.row == 2 && std::abs(diff.col) == 2)
+			{
+				// Make sure we're jumping OVER an enemy piece.
+				const RowCol p1rc(src.row - 1, src.col + 1);
+				const RowCol p2rc(src.row - 1, src.col -1);
+				if (GetPlayerAt(p1rc) == ALPHA || GetPlayerAt(p2rc) == ALPHA)
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool CCheckersBoard::CanAlphaMove(void)
+{
+	for (size_t row = 0; row < m_board.size(); ++row)
+	{
+		for (size_t col = 0; col < m_board[row].size(); ++col)
+		{
+			const RowCol src(row, col);
+			if (GetPlayerAt(src) == ALPHA && (CanMove(src, RowCol(src.row + 1, src.col + 1)) ||
+				CanMove(src, RowCol(src.row + 1, src.col - 1)) ||
+				CanMove(src, RowCol(src.row - 1, src.col + 1)) ||
+				CanMove(src, RowCol(src.row - 1, src.col - 1))))
 				return true;
 		}
 	}
+	return false;
+}
+
+bool CCheckersBoard::CanBetaMove(void)
+{
+	for (size_t row = 0; row < m_board.size(); ++row)
+	{
+		for (size_t col = 0; col < m_board[row].size(); ++col)
+		{
+			const RowCol src(row, col);
+			if (GetPlayerAt(src) == BETA && (CanMove(src, RowCol(src.row - 1, src.col + 1)) ||
+				CanMove(src, RowCol(src.row - 1, src.col - 1)) ||
+				CanMove(src, RowCol(src.row + 1, src.col + 1)) ||
+				CanMove(src, RowCol(src.row + 1, src.col - 1))))
+				return true;
+		}
+	}	
 	return false;
 }

@@ -52,7 +52,7 @@ public:
 	/// Returns whether or not the position exists on the gameboard.
 	bool IsValidPosition(size_t row, size_t col) const 
 	{ 
-		if (row < GetBoard().size() && col < GetBoard().size()) 
+		if ((row < GetBoard().size() && row >= 0) && (col < GetBoard().size() && col >= 0)) 
 			return true; 
 		return false; 
 	}
@@ -75,6 +75,8 @@ public:
 	bool CanJump(const RowCol& src, const RowCol& drc);
 	const std::array<std::array<size_t, 8>, 8>& GetBoard(void) const { return m_board; }
 
+	size_t GetXMargin(void) const { return m_xMargin; }
+	size_t GetYMargin(void) const { return m_yMargin; }
 protected:
 	void Start(void);
 	void Update(double dt);
@@ -102,12 +104,18 @@ protected:
 	/// \note Called only by Move().
 	void HandleSuccessfulMove(const RowCol& drc);
 
+	bool CanAlphaMove(void);
+	bool CanBetaMove(void);
+
+
 private:
 	std::array<std::array<size_t, 8>, 8> m_board;
 	size_t m_curPlayer;
 	RowCol m_selected;
 	size_t m_removedAlphaPieces;
 	size_t m_removedBetaPieces;
+	const size_t m_xMargin;
+	const size_t m_yMargin;
 };
 
 #endif
